@@ -1,0 +1,20 @@
+/* dashboard.css */
+.dashboard-container {
+    display: flex;
+    height: 90vh; /* 视窗高度 */
+  }
+  .foot-container {
+    height: 5vh; /* 1/10 视窗高度 */
+    width: 100%;
+    background-color: lightgray;
+    position: fixed; /* 固定在底部 */
+    bottom: 0; /* 距离底部距离为0 */
+  }
+  .main-and-foot-container {
+    display: flex;
+    flex-direction: column;
+    flex: 1; /* 剩余空间全给 MainContent */
+  }
+  
+
+  
