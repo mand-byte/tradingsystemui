@@ -157,6 +157,13 @@ export const SetExchangeStatus= async (id:number,status:number)=>{
         data: {'id':id,"status":status}
     })
 }
+export const SetExchangeTVSingal= async (id:number,no_open:number,no_close:number)=>{
+    return Http('/set-ex-tvsingal', {
+        method: 'POST',
+        token: getToken() || '',
+        data: {'id':id,"no_open":no_open,"no_close":no_close}
+    })
+}
 export const AddExchange= async (data:AddExRequest)=>{
     return Http('/add-ex', {
         method: 'POST',

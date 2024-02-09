@@ -1,4 +1,4 @@
-import { AddExchange, GetExList, GetSetting, SetExchangeStatus, SetLeverage, SetMartin, SetTG, SetTrend, logout } from "api";
+import { AddExchange, GetExList, GetSetting, SetExchangeStatus, SetExchangeTVSingal, SetLeverage, SetMartin, SetTG, SetTrend, logout } from "api";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button, Divider, Form, Input, InputNumber, Message, Notification, Select, Switch, Table, TableColumnProps } from '@arco-design/web-react';
@@ -32,7 +32,32 @@ const SettingContent: React.FC = () => {
             var response = await SetExchangeStatus(id, status)
             if (response) {
                 if (response.ok) {
-                    setRefreshEx(true)
+                    setRefreshEx(!refreshEx)
+                    Notification.success({
+                        title: 'success',
+                        content: "设置交易所状态成功",
+                    })
+                } else if (response.status !== 200 && response.status < 405) {
+                    await logout()
+                    navigate('/login')
+                } else {
+                    var err = await response.json()
+                    Notification.error({
+                        title: 'error',
+                        content: JSON.stringify(err),
+                    })
+                }
+            }
+        }
+        const handle_ex_tvsingal=async (id:number,no_open:number,no_close:number)=>{
+            var response = await SetExchangeTVSingal(id, no_open,no_close)
+            if (response) {
+                if (response.ok) {
+                    setRefreshEx(!refreshEx)
+                    Notification.success({
+                        title: 'success',
+                        content: "设置交易所tv信号成功",
+                    })
                 } else if (response.status !== 200 && response.status < 405) {
                     await logout()
                     navigate('/login')
@@ -51,15 +76,18 @@ const SettingContent: React.FC = () => {
                 if (response.ok) {
                     var result = await response.json()
                     const _tabledata = result['data'].map((ex: {
-                        deleted: boolean;
-                        account: string;
-                        ex: string;
-                        id: number;
+                        deleted: boolean
+                        account: string
+                        ex: string
+                        id: number
+                        no_close:number
+                        no_open:number
                     }) => ({
                         id: ex.id,
                         ex: ex.ex,
                         account: ex.account,
-                        deleted: ex.deleted,
+                        no_open: (<Button shape='round' type='primary' onClick={() => handle_ex_tvsingal(ex.id, ex.no_open==0?1:0,ex.no_close)}>{ex.no_open==1 ? '恢复' : '禁用'}</Button>),
+                        no_close:(<Button shape='round' type='primary' onClick={() => handle_ex_tvsingal(ex.id, ex.no_open,ex.no_close==0?1:0)}>{ex.no_close==1 ? '恢复' : '禁用'}</Button>),
                         btn: (<Button shape='round' type='primary' onClick={() => handle_ex_status(ex.id, ex.deleted ? 0 : 1)}>{ex.deleted ? '恢复' : '禁用'}</Button>),
                         btn2: (<Button shape='round' type='primary' onClick={() => handle_ex_status(ex.id, 2)}>永久删除</Button>)
                     }))
@@ -122,7 +150,24 @@ const SettingContent: React.FC = () => {
 
     const HandleAddExchange = async (ex: string, account: string, apikey: string, api_secret: string, api_passwd: string) => {
         const response = await AddExchange({ ex: ex, account: account, apikey: apikey, api_secret: api_secret, api_password: api_passwd })
-
+        if (response) {
+            if (response.ok) {
+                setRefreshEx(!refreshEx)
+                Notification.success({
+                    title: 'success',
+                    content: "添加交易所信息成功",
+                })
+            } else if (response.status !== 200 && response.status < 405) {
+                await logout()
+                navigate('/login')
+            } else {
+                var err = await response.json()
+                Notification.error({
+                    title: 'error',
+                    content: JSON.stringify(err),
+                })
+            }
+        }
     }
 
     const columns: TableColumnProps[] = [
@@ -139,11 +184,15 @@ const SettingContent: React.FC = () => {
             dataIndex: 'account',
         },
         {
-            title: '状态',
-            dataIndex: 'deleted',
+            title: '是否监听tv开仓',
+            dataIndex: 'no_open',
         },
         {
-            title: '',
+            title: '是否监听tv平仓',
+            dataIndex: 'no_close',
+        },
+        {
+            title: '使用禁用',
             dataIndex: 'btn',
         }
         ,
