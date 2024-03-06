@@ -17,7 +17,7 @@ const SettingContent: React.FC = () => {
     const [martinMaxCount, setMartinMaxCount] = useState(0)
     const [martinExceptNum, setMartinExceptNum] = useState(1)
     const [martinRatio, setMartinRatio] = useState<boolean>(false)
-    const [martinRatioMoney, setMartinRatioMoney] = useState<number>(0)
+    const [martinRatioMoney, setMartinRatioMoney] = useState<number>(0.008)
     const [martinFixedMoney1, setMartinFixedMoney1] = useState<number>(10)
     const [martinFixedMoney2, setMartinFixedMoney2] = useState<number>(16.18)
     const [martinFixedMoney3, setMartinFixedMoney3] = useState<number>(26.18)
@@ -86,8 +86,8 @@ const SettingContent: React.FC = () => {
                         id: ex.id,
                         ex: ex.ex,
                         account: ex.account,
-                        no_open: (<Button shape='round' type='primary' onClick={() => handle_ex_tvsingal(ex.id, ex.no_open==0?1:0,ex.no_close)}>{ex.no_open==1 ? '恢复' : '禁用'}</Button>),
-                        no_close:(<Button shape='round' type='primary' onClick={() => handle_ex_tvsingal(ex.id, ex.no_open,ex.no_close==0?1:0)}>{ex.no_close==1 ? '恢复' : '禁用'}</Button>),
+                        no_open: (<Button shape='round' type='primary' onClick={() => handle_ex_tvsingal(ex.id, ex.no_open===0?1:0,ex.no_close)}>{ex.no_open===1 ? '恢复' : '禁用'}</Button>),
+                        no_close:(<Button shape='round' type='primary' onClick={() => handle_ex_tvsingal(ex.id, ex.no_open,ex.no_close===0?1:0)}>{ex.no_close===1 ? '恢复' : '禁用'}</Button>),
                         btn: (<Button shape='round' type='primary' onClick={() => handle_ex_status(ex.id, ex.deleted ? 0 : 1)}>{ex.deleted ? '恢复' : '禁用'}</Button>),
                         btn2: (<Button shape='round' type='primary' onClick={() => handle_ex_status(ex.id, 2)}>永久删除</Button>)
                     }))
@@ -201,7 +201,9 @@ const SettingContent: React.FC = () => {
             dataIndex: 'btn2',
         }
     ]
-
+    if (leverage===0) {
+        return <div>No data to display.</div>;
+    }
     return (
         <div>
             <Table columns={columns} data={tableData} hover={false} />
@@ -343,7 +345,7 @@ const SettingContent: React.FC = () => {
                 layout="inline"
             >
                 <FormItem label='设置杠杆' field='leverage' >
-                    <InputNumber placeholder={leverage.toString()} style={{ width: 100 }} min={1}
+                    <InputNumber defaultValue={leverage} placeholder={leverage.toString()}  style={{ width: 100 }} min={1}
                         max={100} step={1}
                         precision={0}
                         onChange={(value) => {
@@ -394,7 +396,7 @@ const SettingContent: React.FC = () => {
                 layout="inline"
             >
                 <FormItem label='同一方向最大同时持仓标的个数' field='max_count' tooltip='0为不限制单一方向开单个数'>
-                    <InputNumber placeholder={martinMaxCount.toString()} style={{ width: 40 }} min={0}
+                    <InputNumber defaultValue={martinMaxCount} placeholder={martinMaxCount.toString()} style={{ width: 40 }} min={0}
                         max={100} step={1}
                         precision={0}
                         onChange={(value) => {
@@ -405,7 +407,7 @@ const SettingContent: React.FC = () => {
                 {martinMaxCount > 0 && (
                     <FormItem label='排除马丁级数' field='except_num' tooltip='当收到马丁级数大于此值的tv信号时不受同一方向最大个数限制'>
 
-                        <InputNumber placeholder={martinExceptNum.toString()} style={{ width: 40 }} min={1}
+                        <InputNumber defaultValue={martinExceptNum} placeholder={martinExceptNum.toString()} style={{ width: 40 }} min={1}
                             max={4} step={1}
                             precision={0}
                             onChange={(value) => {
@@ -424,7 +426,7 @@ const SettingContent: React.FC = () => {
                 {martinRatio && (
                     <FormItem label='账户总金额比例' field='invest_ratio' tooltip='实际投入usdt价值为账户总金额*此比例值*1.618的n次幂'>
 
-                        <InputNumber placeholder={martinRatioMoney.toString()} style={{ width: 100 }} min={0.000001}
+                        <InputNumber defaultValue={martinRatioMoney} placeholder={martinRatioMoney.toString()} style={{ width: 100 }} min={0.000001}
                             max={10} step={0.00001}
                             precision={5}
                             onChange={(value) => {
@@ -436,28 +438,28 @@ const SettingContent: React.FC = () => {
                 {!martinRatio && (
                     <FormItem label='马丁固定投入值' field='invest_fixed' tooltip='实际投入usdt价值为此固定值'>
 
-                        <InputNumber placeholder={martinFixedMoney1.toString()} style={{ width: 100 }} min={10}
+                        <InputNumber defaultValue={martinFixedMoney1} placeholder={martinFixedMoney1.toString()}  style={{ width: 100 }} min={10}
                             step={0.01}
                             precision={2}
                             onChange={(value) => {
                                 setMartinFixedMoney1(value)
                             }}
                         />
-                        <InputNumber placeholder={martinFixedMoney2.toString()} style={{ width: 100 }} min={10}
+                        <InputNumber defaultValue={martinFixedMoney2} placeholder={martinFixedMoney2.toString()}  style={{ width: 100 }} min={10}
                             step={0.01}
                             precision={2}
                             onChange={(value) => {
                                 setMartinFixedMoney2(value)
                             }}
                         />
-                        <InputNumber placeholder={martinFixedMoney3.toString()} style={{ width: 100 }} min={10}
+                        <InputNumber defaultValue={martinFixedMoney3} placeholder={martinFixedMoney3.toString()}  style={{ width: 100 }} min={10}
                             step={0.01}
                             precision={2}
                             onChange={(value) => {
                                 setMartinFixedMoney3(value)
                             }}
                         />
-                        <InputNumber placeholder={martinFixedMoney4.toString()} style={{ width: 100 }} min={10}
+                        <InputNumber defaultValue={martinFixedMoney4} placeholder={martinFixedMoney4.toString()} style={{ width: 100 }} min={10}
                             step={0.01}
                             precision={2}
                             onChange={(value) => {
@@ -513,20 +515,21 @@ const SettingContent: React.FC = () => {
                 </FormItem>
                 {trendRatio && (
                     <FormItem label='比例投入' field='invest_ratio' tooltip='实际投入usdt价值为账户合约总额*此比例值，注意杠杆'>
-
-                        <InputNumber placeholder={trendRatioInvest.toString()} style={{ width: 100 }} min={10}
-                            step={0.01}
-                            precision={2}
+                        
+                        <InputNumber defaultValue={trendRatioInvest} placeholder={trendRatioInvest.toString()} style={{ width: 100 }} min={0.0001} 
+                            step={0.0001}
+                            precision={4}
                             onChange={(value) => {
                                 setTrendRatioInvest(value)
                             }}
                         />
                     </FormItem>
                 )}
+                
                 {!trendRatio && (
                     <FormItem label='固定投入' field='invest_fixed' tooltip='实际投入usdt价值为此值'>
 
-                        <InputNumber placeholder={trendFixedInvest.toString()} style={{ width: 100 }} min={10}
+                        <InputNumber  style={{ width: 100 }} min={10} defaultValue={trendFixedInvest} placeholder={trendFixedInvest.toString()}
                             step={0.01}
                             precision={2}
                             onChange={(value) => {
@@ -535,9 +538,9 @@ const SettingContent: React.FC = () => {
                         />
                     </FormItem>
                 )}
-                <FormItem label='趋势tp值' field='trendTP' tooltip='收益高于此值平仓，设0为tv信号平仓，例:0.018为收益18%平仓'>
+                <FormItem label='趋势tp值' field='trendTP' tooltip='设0为tv信号平仓，设:0.018为上涨或下跌1.8%平仓'>
 
-                    <InputNumber placeholder={trendTP.toString()} style={{ width: 100 }} min={0.001}
+                    <InputNumber  style={{ width: 100 }} min={0} defaultValue={trendTP} placeholder={trendTP.toString()}
                         step={0.001}
                         precision={3}
                         onChange={(value) => {
