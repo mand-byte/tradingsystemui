@@ -13,7 +13,9 @@ interface MainContentProp {
 }
 
 const MainContent: FC<MainContentProp> = ({ type,  exchanges }) => {
-
+    if (exchanges.length===0) {
+        return <div>No data to display.</div>;
+    }
     return (
         <>
             {type === PanelType.ACCOUNT && (
