@@ -199,14 +199,15 @@ export const SetMartin= async (data:SetMartinRequest)=>{
         data: data
     })
 }
-export const SetTrend= async (use_ratio:boolean,num:number,tp:number)=>{
+export const SetTrend= async (use_ratio:boolean,num:number,tp:number,sl:number)=>{
     return Http('/set-trend', {
         method: 'POST',
         token: getToken() || '',
         data: {
             'use_ratio':use_ratio,
             'num':num,
-            'tp':tp
+            'tp':tp,
+            'sl':sl
         }
     })
 }
