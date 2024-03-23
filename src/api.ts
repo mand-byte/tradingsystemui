@@ -211,4 +211,13 @@ export const SetTrend= async (use_ratio:boolean,num:number,tp:number,sl:number)=
         }
     })
 }
+export const SetProfitTrans= async (ratio:number)=>{
+    return Http('/set-profit-trans', {
+        method: 'POST',
+        token: getToken() || '',
+        data: {
+            'ratio':ratio
+        }
+    })
+}
 export const logout = async () => window.localStorage.removeItem(localStorageKey)

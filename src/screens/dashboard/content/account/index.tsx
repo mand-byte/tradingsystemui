@@ -29,14 +29,7 @@ const AccountContent: FC<AccountContentProp> = ({ exchanges }) => {
                     var result = await response.json()
                     const swapaccounts=result['data']['swap']
                     const spotaccounts=result['data']['spot']
-                    var t=0
-                    for (var i in swapaccounts){
-                        t+=swapaccounts[i].total
-                    }
-                    for (var s in spotaccounts){
-                        t+=spotaccounts[s].total+spotaccounts[s].unrealizedPL
-                    }
-                    setTotal(t)
+                   
                     const tableData = exchanges.map((ex) => ({
                         key: `${ex.id}`,
                         name: `${ex.ex}-${ex.account}`,
@@ -46,10 +39,18 @@ const AccountContent: FC<AccountContentProp> = ({ exchanges }) => {
                         spot: spotaccounts[ex.id]?.total.toFixed(2) || 0,
                         spotavailable: spotaccounts[ex.id]?.available.toFixed(2) || 0,
                         spotlocked: spotaccounts[ex.id]?.unrealizedPL.toFixed(2) || 0,
-                        all: ((swapaccounts[ex.id]?.total || 0) + (spotaccounts[ex.id]?.total || 0) + (spotaccounts[ex.id]?.unrealizedPL || 0)).toFixed(2),
+                        funding : spotaccounts[ex.id]?.funding.toFixed(2) || 0,
+                        all: ex.ex!=='nexo'? ((swapaccounts[ex.id]?.total || 0) + (spotaccounts[ex.id]?.total || 0) + (spotaccounts[ex.id]?.unrealizedPL || 0)+ (spotaccounts[ex.id]?.funding || 0)).toFixed(2)
+                        :((swapaccounts[ex.id]?.total || 0)+(spotaccounts[ex.id]?.unrealizedPL || 0)).toFixed(2),
                 
                     }));
+
                     setTableData(tableData)
+                    let totalAll = 0;
+                    tableData.forEach((data) => {
+                        totalAll += parseFloat(data.all);
+                    });
+                    setTotal(totalAll)
                 } else if (response.status !== 200 && response.status < 405) {
                     await logout()
                     navigate('/login')
@@ -142,6 +143,11 @@ const AccountContent: FC<AccountContentProp> = ({ exchanges }) => {
         {
             title: '现货总价值',
             dataIndex: 'spotlocked',
+        }
+        ,
+        {
+            title: '理财/资金',
+            dataIndex: 'funding',
         }
         ,
         {

@@ -1,4 +1,4 @@
-import { AddExchange, GetExList, GetSetting, SetExchangeStatus, SetExchangeTVSingal, SetLeverage, SetMartin, SetTG, SetTrend, logout } from "api";
+import { AddExchange, GetExList, GetSetting, SetExchangeStatus, SetExchangeTVSingal, SetLeverage, SetMartin, SetProfitTrans, SetTG, SetTrend, logout } from "api";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button, Divider, Form, Input, InputNumber, Message, Notification, Select, Switch, Table, TableColumnProps } from '@arco-design/web-react';
@@ -28,6 +28,7 @@ const SettingContent: React.FC = () => {
     const [trendFixedInvest, setTrendFixedInvest] = useState<number>(150)
     const [trendTP, setTrendTP] = useState<number>(0.025)
     const [trendSL, setTrendSL] = useState<number>(0.025)
+    const [profitTransfer,setProfitTransfer]=useState<number>(0.4)
     useEffect(() => {
         const handle_ex_status = async (id: number, status: number) => {
             var response = await SetExchangeStatus(id, status)
@@ -135,6 +136,7 @@ const SettingContent: React.FC = () => {
                     setTrendFixedInvest(result['data']['Trend']['TREND_FIXED_INVEST'])
                     setTrendTP(result['data']['Trend']['TREND_TP_RATIO'])
                     setTrendSL(result['data']['Trend']['TREND_SL_RATIO'])
+                    setProfitTransfer(result['data']['TransferProfit'])
                 } else if (response.status !== 200 && response.status < 405) {
                     await logout()
                     navigate('/login')
@@ -224,7 +226,7 @@ const SettingContent: React.FC = () => {
                 <FormItem label='交易所' field='ex'>
                     <Select
                         placeholder='select exchange'
-                        options={['binance', 'okx', 'bitget']}
+                        options={['binance', 'okx', 'bitget','nexo']}
                         style={{ width: 154 }}
                     />
                 </FormItem>
@@ -518,7 +520,7 @@ const SettingContent: React.FC = () => {
                 {trendRatio && (
                     <FormItem label='比例投入' field='invest_ratio' tooltip='实际投入usdt价值为账户合约总额*此比例值，注意杠杆'>
 
-                        <InputNumber defaultValue={trendRatioInvest} placeholder={trendRatioInvest != undefined ? trendRatioInvest.toString() : ''} style={{ width: 100 }} min={0.0001}
+                        <InputNumber defaultValue={trendRatioInvest} placeholder={trendRatioInvest !== undefined ? trendRatioInvest.toString() : ''} style={{ width: 100 }} min={0.0001}
                             step={0.0001}
                             precision={4}
                             onChange={(value) => {
@@ -531,7 +533,7 @@ const SettingContent: React.FC = () => {
                 {!trendRatio && (
                     <FormItem label='固定投入' field='invest_fixed' tooltip='实际投入usdt价值为此值'>
 
-                        <InputNumber style={{ width: 100 }} min={10} defaultValue={trendFixedInvest} placeholder={trendRatioInvest != undefined ? trendFixedInvest.toString() : ''}
+                        <InputNumber style={{ width: 100 }} min={10} defaultValue={trendFixedInvest} placeholder={trendRatioInvest !== undefined ? trendFixedInvest.toString() : ''}
                             step={0.01}
                             precision={2}
                             onChange={(value) => {
@@ -542,7 +544,7 @@ const SettingContent: React.FC = () => {
                 )}
                 <FormItem label='趋势tp值' field='trendTP' tooltip='设0为tv信号平仓，设:0.018为上涨或下跌1.8%平仓'>
 
-                    <InputNumber style={{ width: 100 }} min={0} defaultValue={trendTP} placeholder={trendTP != undefined ? trendTP.toString() : ''}
+                    <InputNumber style={{ width: 100 }} min={0} defaultValue={trendTP} placeholder={trendTP !== undefined ? trendTP.toString() : ''}
                         step={0.001}
                         precision={3}
                         onChange={(value) => {
@@ -552,7 +554,7 @@ const SettingContent: React.FC = () => {
                 </FormItem>
                 <FormItem label='趋势sl值' field='trendSL' tooltip='设0为tv信号平仓，设:0.018为上涨或下跌1.8%平仓'>
 
-                    <InputNumber style={{ width: 100 }} min={0} defaultValue={trendSL} placeholder={trendSL != undefined ? trendSL.toString() : ''}
+                    <InputNumber style={{ width: 100 }} min={0} defaultValue={trendSL} placeholder={trendSL !== undefined ? trendSL.toString() : ''}
                         step={0.001}
                         precision={3}
                         onChange={(value) => {
@@ -569,6 +571,54 @@ const SettingContent: React.FC = () => {
                                 Notification.success({
                                     title: 'success',
                                     content: "趋势设置成功",
+                                })
+                            } else if (response.status !== 200 && response.status < 405) {
+                                await logout()
+                                navigate('/login')
+                            } else {
+                                var err = await response.json()
+                                Notification.error({
+                                    title: 'error',
+                                    content: JSON.stringify(err),
+                                })
+                            }
+                        }
+                    }}
+                    type='primary'
+                >
+                    提交
+                </Button>
+            </Form>
+            <Divider
+                style={{
+                    borderBottomWidth: 2,
+                    borderBottomStyle: 'dotted',
+                }} />
+            <Form
+                autoComplete='off'
+                size='mini'
+                style={{ background: 'black', width: '100%' }}
+                scrollToFirstError
+                layout="inline"
+            >
+                <FormItem label='平仓盈利后转移一定比例资金到资金/现金账户' field='tranferprofit' >
+                <InputNumber style={{ width: 100 }} min={0} max={1} defaultValue={profitTransfer} placeholder={profitTransfer !== undefined ? profitTransfer.toString() : ''}
+                        step={0.01}
+                        precision={2}
+                        onChange={(value) => {
+                            setProfitTransfer(value)
+                        }}
+                    />
+                </FormItem>
+                <Button
+                    onClick={async () => {
+
+                        const response = await SetProfitTrans(profitTransfer)
+                        if (response) {
+                            if (response.ok) {
+                                Notification.success({
+                                    title: 'success',
+                                    content: "设置利润转移设置成功",
                                 })
                             } else if (response.status !== 200 && response.status < 405) {
                                 await logout()
