@@ -40,8 +40,7 @@ const AccountContent: FC<AccountContentProp> = ({ exchanges }) => {
                         spotavailable: spotaccounts[ex.id]?.available.toFixed(2) || 0,
                         spotlocked: spotaccounts[ex.id]?.unrealizedPL.toFixed(2) || 0,
                         funding : spotaccounts[ex.id]?.funding.toFixed(2) || 0,
-                        all: ex.ex!=='nexo'? ((swapaccounts[ex.id]?.total || 0) + (spotaccounts[ex.id]?.total || 0) + (spotaccounts[ex.id]?.unrealizedPL || 0)+ (spotaccounts[ex.id]?.funding || 0)).toFixed(2)
-                        :((swapaccounts[ex.id]?.total || 0)+(spotaccounts[ex.id]?.unrealizedPL || 0)).toFixed(2),
+                        all: ((swapaccounts[ex.id]?.total || 0) + (spotaccounts[ex.id]?.total || 0) + (spotaccounts[ex.id]?.unrealizedPL || 0)+ (spotaccounts[ex.id]?.funding || 0)).toFixed(2),
                 
                     }));
 

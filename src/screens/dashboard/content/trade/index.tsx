@@ -149,7 +149,7 @@ const TradeContent: FC<TradeContentProp> = ({ exchanges }) => {
                             type="checkbox"
                             onChange={() => handleCheckboxChange(exchange.id)}
                         />
-                        <label>{`${exchange.ex} - ${exchange.account}`}- 可用usdt:  {isswap === false && exchange.ex !== 'okx' ? (spotaccounts[exchange.id]?.available.toFixed(2)) : (
+                        <label>{`${exchange.ex} - ${exchange.account}`}- 可用usdt:  {(isswap === false && exchange.ex !== 'okx'  && exchange.ex !== 'nexo') ? (spotaccounts[exchange.id]?.available.toFixed(2)) : (
                             swapaccounts[exchange.id]?.available.toFixed(2)
                         )}</label>
                     </div>

@@ -601,7 +601,7 @@ const SettingContent: React.FC = () => {
                 scrollToFirstError
                 layout="inline"
             >
-                <FormItem label='平仓盈利后转移一定比例资金到资金/现金账户' field='tranferprofit' >
+                <FormItem label='转移盈利比例' field='tranferprofit' tooltip='合约平仓转移利润到资金/现金账户,范围0-1'>
                 <InputNumber style={{ width: 100 }} min={0} max={1} defaultValue={profitTransfer} placeholder={profitTransfer !== undefined ? profitTransfer.toString() : ''}
                         step={0.01}
                         precision={2}
