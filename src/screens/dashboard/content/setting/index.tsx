@@ -1,4 +1,4 @@
-import { AddExchange, GetExList, GetSetting, SetExchangeStatus, SetExchangeTVSingal, SetLeverage, SetMartin, SetProfitTrans, SetTG, SetTrend, logout } from "api";
+import { AddExchange, GetExList, GetSetting, SetExchangeStatus, SetExchangeTVSingal, SetLeverage, SetLongShortRatioRequest, SetMartin, SetProfitTrans, SetTG, SetTrend, logout } from "api";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button, Divider, Form, Input, InputNumber, Message, Notification, Select, Switch, Table, TableColumnProps } from '@arco-design/web-react';
@@ -29,6 +29,8 @@ const SettingContent: React.FC = () => {
     const [trendTP, setTrendTP] = useState<number>(0.025)
     const [trendSL, setTrendSL] = useState<number>(0.025)
     const [profitTransfer,setProfitTransfer]=useState<number>(0.4)
+    const [longRatio,setLongRatio]=useState<number>(0)
+    const [shortRatio,setShortRatio]=useState<number>(0)
     useEffect(() => {
         const handle_ex_status = async (id: number, status: number) => {
             var response = await SetExchangeStatus(id, status)
@@ -51,14 +53,14 @@ const SettingContent: React.FC = () => {
                 }
             }
         }
-        const handle_ex_tvsingal = async (id: number, no_open: number, no_close: number) => {
-            var response = await SetExchangeTVSingal(id, no_open, no_close)
+        const handle_ex_tvsingal = async (id: number, no_open: number, no_close: number,no_move_asset:number) => {
+            var response = await SetExchangeTVSingal(id, no_open, no_close,no_move_asset)
             if (response) {
                 if (response.ok) {
                     setRefreshEx(!refreshEx)
                     Notification.success({
                         title: 'success',
-                        content: "设置交易所tv信号成功",
+                        content: "交易所配置设置成功",
                     })
                 } else if (response.status !== 200 && response.status < 405) {
                     await logout()
@@ -84,12 +86,14 @@ const SettingContent: React.FC = () => {
                         id: number
                         no_close: number
                         no_open: number
+                        no_move_asset:number
                     }) => ({
                         id: ex.id,
                         ex: ex.ex,
                         account: ex.account,
-                        no_open: (<Button shape='round' type='primary' onClick={() => handle_ex_tvsingal(ex.id, ex.no_open === 0 ? 1 : 0, ex.no_close)}>{ex.no_open === 1 ? '恢复' : '禁用'}</Button>),
-                        no_close: (<Button shape='round' type='primary' onClick={() => handle_ex_tvsingal(ex.id, ex.no_open, ex.no_close === 0 ? 1 : 0)}>{ex.no_close === 1 ? '恢复' : '禁用'}</Button>),
+                        no_open: (<Button shape='round' type='primary' onClick={() => handle_ex_tvsingal(ex.id, ex.no_open === 0 ? 1 : 0, ex.no_close,ex.no_move_asset)}>{ex.no_open === 1 ? '恢复' : '禁用'}</Button>),
+                        no_close: (<Button shape='round' type='primary' onClick={() => handle_ex_tvsingal(ex.id, ex.no_open, ex.no_close === 0 ? 1 : 0,ex.no_move_asset)}>{ex.no_close === 1 ? '恢复' : '禁用'}</Button>),
+                        no_move_asset:(<Button shape='round' type='primary' onClick={() => handle_ex_tvsingal(ex.id, ex.no_open, ex.no_close,ex.no_move_asset === 0 ? 1 : 0)}>{ex.no_move_asset === 1 ? '开启' : '禁用'}</Button>),
                         btn: (<Button shape='round' type='primary' onClick={() => handle_ex_status(ex.id, ex.deleted ? 0 : 1)}>{ex.deleted ? '恢复' : '禁用'}</Button>),
                         btn2: (<Button shape='round' type='primary' onClick={() => handle_ex_status(ex.id, 2)}>永久删除</Button>)
                     }))
@@ -137,6 +141,8 @@ const SettingContent: React.FC = () => {
                     setTrendTP(result['data']['Trend']['TREND_TP_RATIO'])
                     setTrendSL(result['data']['Trend']['TREND_SL_RATIO'])
                     setProfitTransfer(result['data']['TransferProfit'])
+                    setLongRatio(result['data']['LongRatio'])
+                    setShortRatio(result['data']['ShortRatio'])
                 } else if (response.status !== 200 && response.status < 405) {
                     await logout()
                     navigate('/login')
@@ -196,6 +202,10 @@ const SettingContent: React.FC = () => {
             dataIndex: 'no_close',
         },
         {
+            title: '是否闲置时理财',
+            dataIndex: 'no_move_asset',
+        },
+        {
             title: '使用禁用',
             dataIndex: 'btn',
         }
@@ -208,6 +218,23 @@ const SettingContent: React.FC = () => {
     if (leverage === 0) {
         return <div>No data to display.</div>;
     }
+    const handleLongRatioChange = (value:number) => {
+        if (value !== undefined) {
+            if (value < 1) {
+                setShortRatio(1);
+            }
+            setLongRatio(value);
+        }
+    };
+
+    const handleShortRatioChange = (value:number) => {
+        if (value !== undefined) {
+            if (value < 1) {
+                setLongRatio(1);
+            }
+            setShortRatio(value);
+        }
+    };
     return (
         <div>
             <Table columns={columns} data={tableData} hover={false} />
@@ -618,7 +645,58 @@ const SettingContent: React.FC = () => {
                             if (response.ok) {
                                 Notification.success({
                                     title: 'success',
-                                    content: "设置利润转移设置成功",
+                                    content: "利润转移设置成功",
+                                })
+                            } else if (response.status !== 200 && response.status < 405) {
+                                await logout()
+                                navigate('/login')
+                            } else {
+                                var err = await response.json()
+                                Notification.error({
+                                    title: 'error',
+                                    content: JSON.stringify(err),
+                                })
+                            }
+                        }
+                    }}
+                    type='primary'
+                >
+                    提交
+                </Button>
+            </Form>
+            <Divider
+                style={{
+                    borderBottomWidth: 2,
+                    borderBottomStyle: 'dotted',
+                }}
+            />
+            <Form
+                autoComplete='off'
+                size='mini'
+                style={{ background: 'black', width: '100%' }}
+                scrollToFirstError
+                layout="inline"
+            >
+                <FormItem label='设置多空投入比值' field='longshortratio' tooltip='long为1，short为0.8时，做空时为上面设定资金的0.8'></FormItem>
+                <InputNumber style={{ width: 100 }} min={0.01} max={1} value={longRatio} 
+                        step={0.01}
+                        precision={2}
+                        onChange={handleLongRatioChange}
+                    />
+                    <InputNumber style={{ width: 100 }} min={0.01} max={1} value={shortRatio} 
+                        step={0.01}
+                        precision={2}
+                        onChange={handleShortRatioChange}
+                    />
+                    <Button
+                    onClick={async () => {
+
+                        const response = await SetLongShortRatioRequest(longRatio,shortRatio)
+                        if (response) {
+                            if (response.ok) {
+                                Notification.success({
+                                    title: 'success',
+                                    content: "多空投入比例设置成功",
                                 })
                             } else if (response.status !== 200 && response.status < 405) {
                                 await logout()

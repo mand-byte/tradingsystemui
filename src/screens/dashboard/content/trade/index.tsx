@@ -102,11 +102,7 @@ const TradeContent: FC<TradeContentProp> = ({ exchanges }) => {
         }
         for (var exid in selectExIds) {
             const id = selectExIds[exid]
-            if (isswap) {
-                if (swapaccounts[id].available < money) {
-                    continue
-                }
-            } else {
+            if (isswap==false) {
                 if (spotaccounts[id].available < money) {
                     continue
                 }

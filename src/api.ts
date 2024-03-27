@@ -157,11 +157,11 @@ export const SetExchangeStatus= async (id:number,status:number)=>{
         data: {'id':id,"status":status}
     })
 }
-export const SetExchangeTVSingal= async (id:number,no_open:number,no_close:number)=>{
+export const SetExchangeTVSingal= async (id:number,no_open:number,no_close:number,no_move_asset:number)=>{
     return Http('/set-ex-tvsingal', {
         method: 'POST',
         token: getToken() || '',
-        data: {'id':id,"no_open":no_open,"no_close":no_close}
+        data: {'id':id,"no_open":no_open,"no_close":no_close,'no_move_asset':no_move_asset}
     })
 }
 export const AddExchange= async (data:AddExRequest)=>{
@@ -217,6 +217,16 @@ export const SetProfitTrans= async (ratio:number)=>{
         token: getToken() || '',
         data: {
             'ratio':ratio
+        }
+    })
+}
+export const SetLongShortRatioRequest= async (long:number,short:number)=>{
+    return Http('/set-longshort-ratio', {
+        method: 'POST',
+        token: getToken() || '',
+        data: {
+            'long':long,
+            'short':short
         }
     })
 }
