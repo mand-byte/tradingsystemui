@@ -1,5 +1,5 @@
 import { FC, useState } from 'react';
-import { Modal, Form, Input, Notification } from '@arco-design/web-react';
+import { Modal, Form, Notification, InputNumber } from '@arco-design/web-react';
 import { OrderInfo,ModifySLTPRequest } from 'ObjectClass';
 import {  modifySLTP } from 'api';
 const FormItem = Form.Item;
@@ -13,6 +13,8 @@ const ModifySLTP: FC<ModifySLTPProps> = ({ order, visible, setVisible, refreshDa
 
     const [confirmLoading, setConfirmLoading] = useState(false);
     const [form] = Form.useForm();
+    form.setFieldValue('sl',order?.sl)
+    form.setFieldValue('tp',order?.tp)
     async function onOk() {
 
         var intput_sl = form.getFieldValue('sl')
@@ -104,10 +106,10 @@ const ModifySLTP: FC<ModifySLTPProps> = ({ order, visible, setVisible, refreshDa
                 >
                   
                     <FormItem label='止损价' field='sl' >
-                        <Input placeholder={`${order?.sl||0}`} />
+                        <InputNumber min={0}/>
                     </FormItem>
                     <FormItem label='止盈价' field='tp' >
-                        <Input placeholder={`${order?.tp||0}`} />
+                        <InputNumber min={0}/>
                     </FormItem>
                 </Form>
             </Modal>

@@ -15,6 +15,10 @@ const ModifyOrder: FC<OrderInfoProps> = ({ order, visible, setVisible,refreshDat
     const [confirmLoading, setConfirmLoading] = useState(false);
     const [form] = Form.useForm();
     const navigate = useNavigate();
+    form.setFieldValue('price',order?.priceAvg)
+    form.setFieldValue('posSide',order?.posSide)
+    form.setFieldValue('sl',order?.sl)
+    form.setFieldValue('tp',order?.tp)
     async function onOk() {
         var intput_money = form.getFieldValue("money")
         var intput_price = form.getFieldValue('price')
@@ -132,7 +136,7 @@ const ModifyOrder: FC<OrderInfoProps> = ({ order, visible, setVisible,refreshDat
                         {/* <Select options={['男', '女']} /> */}
                     </FormItem>
                     <FormItem label='开仓价格' field='price' >
-                        <Input placeholder={`${order?.priceAvg}`} />
+                        <Input value={`${order?.priceAvg}`} />
                     </FormItem>
                     {
                         order?.isswap && <FormItem label='多空' field='posSide' >
@@ -140,10 +144,10 @@ const ModifyOrder: FC<OrderInfoProps> = ({ order, visible, setVisible,refreshDat
                         </FormItem>
                     }
                     <FormItem label='止损价' field='sl' >
-                        <Input placeholder={`${order?.sl}`} />
+                        <Input value={`${order?.sl}`} />
                     </FormItem>
                     <FormItem label='止盈价' field='tp' >
-                        <Input placeholder={`${order?.tp}`} />
+                        <Input value={`${order?.tp}`} />
                     </FormItem>
                 </Form>
             </Modal>
